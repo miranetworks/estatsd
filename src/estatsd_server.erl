@@ -113,8 +113,9 @@ send_to_graphite(Msg, State) ->
     %error_logger:info_msg("estatsd tx ~s\n", [Msg]),
     case gen_tcp:connect(State#state.graphite_host,
                          State#state.graphite_port,
-                         [list, {packet, 0}]) of
+                         [list, {packet, 0}], 60000) of
         {ok, Sock} ->
+            inet:setopts(Sock,[{send_timeout, 120000}]),
             gen_tcp:send(Sock, Msg),
             gen_tcp:close(Sock),
             gen_server:cast(?MODULE, {tx_bytes, iolist_size(Msg)}),
@@ -141,7 +142,7 @@ key2str(K) when is_list(K) ->
 
 num2str(NN) -> lists:flatten(io_lib:format("~w",[NN])).
 
-unixtime()  -> {Meg,S,_Mic} = erlang:now(), Meg*1000000 + S.
+unixtime()  -> {Meg,S,_Mic} = os:timestamp(), Meg*1000000 + S.
 
 %% Aggregate the stats and generate a report to send to graphite
 do_report(All, Gauges, State) ->
