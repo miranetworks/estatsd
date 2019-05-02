@@ -133,7 +133,7 @@ key2str(K) when is_binary(K) ->
 key2str(K) when is_list(K) ->
     {ok, R1} = re:compile("\\s+"),
     {ok, R2} = re:compile("/"),
-    {ok, R3} = re:compile("[^a-zA-Z_\\-0-9\\.]"),
+    {ok, R3} = re:compile("[^a-zA-Z_\\-0-9\\.;=]"),
     Opts = [global, {return, list}],
     S1 = re:replace(K,  R1, "_", Opts),
     S2 = re:replace(S1, R2, "-", Opts),
